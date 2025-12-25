@@ -12,10 +12,10 @@ export default function ClientLayout({ children }) {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sidebar collapsed={collapsed} />
-      
+
       <Layout style={{ marginLeft: collapsed ? 80 : 240, transition: 'all 0.2s' }}>
         <Header collapsed={collapsed} setCollapsed={setCollapsed} />
-        
+
         <Content
           style={{
             margin: 10,

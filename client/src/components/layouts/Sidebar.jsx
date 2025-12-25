@@ -212,7 +212,7 @@ export default function Sidebar({ collapsed }) {
             selectable={false}
             style={{
               border: 'none',
-              background: 'transparent',  
+              background: 'transparent',
             }}
           />
         </div>
