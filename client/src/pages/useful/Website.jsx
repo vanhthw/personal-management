@@ -16,7 +16,7 @@ const Website = () => {
             color: "#722ed1",
             icon: "AppstoreOutlined",
             websites: [
-                { name: "Korea Web Design", description: "Discover the world's top designers and creatives.", url: "https://koreawebdesign.com/" },
+                { name: "Korea Web Design", description: "Tham khảo thiết kế UI/UX", url: "https://koreawebdesign.com/" },
                 { name: "Behance", description: "Showcase and discover creative work.", url: "https://www.behance.net" },
             ],
         },
@@ -35,7 +35,7 @@ const Website = () => {
             icon: "CodeOutlined",
             websites: [
                 { name: "StudyFoc.us", description: "Pomodoro", url: "https://studyfoc.us./pomodoro" },
-                { name: "GitHub", description: "A platform for hosting and reviewing code.", url: "https://github.com" },
+                { name: "Rổ Phim", description: "Cứ tưởng đang dùng Netflix", url: "https://www.rophim.li/phimhay" },
             ],
         },
     ]);
