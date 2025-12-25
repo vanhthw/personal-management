@@ -1,91 +1,61 @@
 import React, { useState } from 'react';
 import { Layout, Menu } from 'antd';
-import {
-  AreaChartOutlined,
-  BookOutlined,
-  FieldTimeOutlined,
-  FileTextOutlined,
-  CalendarOutlined,
-  CheckSquareOutlined,
-  DollarOutlined,
-  WalletOutlined,
-  LineChartOutlined,
-  RiseOutlined,
-  HeartOutlined,
-  SettingOutlined,
-  GlobalOutlined,
-} from '@ant-design/icons';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { routes, secondaryRoutes, getMenuItems } from '../../app/routes';
 
 const { Sider } = Layout;
 
-const mainMenuItems = [
-  {
-    key: 'dashboard',
-    icon: <AreaChartOutlined />,
-    label: 'Dashboard',
-  },
-  {
-    key: '1',
-    icon: <BookOutlined />,
-    label: 'Học tập',
-    children: [
-      { key: '1-1', icon: <FileTextOutlined />, label: 'Ghi chú kiến thức' },
-      { key: '1-2', icon: <CalendarOutlined />, label: 'Lịch học' },
-    ],
-  },
-  {
-    key: '2',
-    icon: <CheckSquareOutlined />,
-    label: 'Công việc',
-    children: [
-      { key: '2-1', icon: <CheckSquareOutlined />, label: 'Danh sách việc' },
-      { key: '2-2', icon: <CalendarOutlined />, label: 'Lịch trình' },
-    ],
-  },
-  {
-    key: '3',
-    icon: <DollarOutlined />,
-    label: 'Tài chính',
-    children: [
-      { key: '3-1', icon: <WalletOutlined />, label: 'Thu chi' },
-      { key: '3-2', icon: <LineChartOutlined />, label: 'Phân tích' },
-    ],
-  },
-  {
-    key: '4',
-    icon: <FieldTimeOutlined />,
-    label: 'Thời gian',
-    children: [
-      { key: '4-1', icon: <RiseOutlined />, label: 'Theo dõi tiến độ' },
-      { key: '4-2', icon: <HeartOutlined />, label: 'Thói quen' },
-      { key: '4-3', icon: <CalendarOutlined />, label: 'Pomodoro' },
-    ],
-  },
-  {
-    key: '5',
-    icon: <BookOutlined />,
-    label: 'Hữu ích',
-    children: [
-      { key: '5-1', icon: <GlobalOutlined />, label: 'Website' },
-      { key: '5-2', icon: <HeartOutlined />, label: '?' },
-    ],
-  },
-];
+// Chuyển routes thành menu items
+const mainMenuItems = getMenuItems(routes);
+const secondaryMenuItems = getMenuItems(secondaryRoutes);
 
-const secondaryMenuItems = [
-  {
-    key: 'settings',
-    icon: <SettingOutlined />,
-    label: 'Cài đặt',
-  },
-];
+// Helper: Tìm route theo key (dùng để lấy path khi click)
+function findRouteByKey(key, routeList) {
+  for (const route of routeList) {
+    if (route.key === key) return route;
+    if (route.children) {
+      const found = findRouteByKey(key, route.children);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+// Helper: Tìm key và openKeys dựa trên current path
+function findKeysByPath(pathname, routeList, parentKey = null) {
+  for (const route of routeList) {
+    if (route.path === pathname) {
+      return {
+        selectedKey: route.key,
+        openKey: parentKey,
+      };
+    }
+    if (route.children) {
+      const result = findKeysByPath(pathname, route.children, route.key);
+      if (result.selectedKey) return result;
+    }
+  }
+  return { selectedKey: null, openKey: null };
+}
 
 export default function Sidebar({ collapsed }) {
-  const [selectedKeys, setSelectedKeys] = useState(['1-1']);
-  const [openKeys, setOpenKeys] = useState(['1']);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Tự động detect selected key và open key dựa trên URL hiện tại
+  const { selectedKey, openKey } = findKeysByPath(location.pathname, [...routes, ...secondaryRoutes]);
+
+  const [selectedKeys, setSelectedKeys] = useState(selectedKey ? [selectedKey] : ['dashboard']);
+  const [openKeys, setOpenKeys] = useState(openKey ? [openKey] : []);
 
   const handleMenuClick = ({ key }) => {
     setSelectedKeys([key]);
+
+    // Tìm route tương ứng và navigate
+    const route = findRouteByKey(key, routes) || findRouteByKey(key, secondaryRoutes);
+    if (route?.path) {
+      navigate(route.path); // Dùng navigate thay vì window.location.href
+    }
   };
 
   const handleOpenChange = (keys) => {
@@ -111,21 +81,17 @@ export default function Sidebar({ collapsed }) {
             width: 100%;
         }
 
-        /* --- PHẦN MỚI THÊM: Highlight cha khi con được chọn ở chế độ Collapsed --- */
-        
-        /* Khi menu thu nhỏ, tìm item cha đang được chọn (submenu-selected) */
+        /* --- Highlight cha khi con được chọn ở chế độ Collapsed --- */
         .ant-menu-inline-collapsed > .ant-menu-submenu-selected > .ant-menu-submenu-title {
-            background-color: #1677ff !important; /* Màu xanh Ant Design mặc định, bạn có thể đổi */
+            background-color: #1677ff !important;
             color: #fff !important;
-            border-radius: 8px; /* Bo góc nhẹ cho đẹp */
+            border-radius: 8px;
         }
 
-        /* Đảm bảo icon bên trong cũng màu trắng cho nổi */
         .ant-menu-inline-collapsed > .ant-menu-submenu-selected > .ant-menu-submenu-title .anticon {
             color: #fff !important;
         }
 
-        /* Tinh chỉnh hover một chút cho mượt */
         .ant-menu-inline-collapsed > .ant-menu-submenu > .ant-menu-submenu-title:hover {
             color: #fff !important;
         }
@@ -214,7 +180,7 @@ export default function Sidebar({ collapsed }) {
           <Menu
             theme="dark"
             mode="inline"
-            inlineCollapsed={collapsed} // QUAN TRỌNG: Fix lỗi click và hiển thị
+            inlineCollapsed={collapsed}
             selectedKeys={selectedKeys}
             openKeys={openKeys}
             onClick={handleMenuClick}
@@ -239,14 +205,14 @@ export default function Sidebar({ collapsed }) {
           <Menu
             theme="dark"
             mode="inline"
-            inlineCollapsed={collapsed} // QUAN TRỌNG
+            inlineCollapsed={collapsed}
             selectedKeys={selectedKeys}
             onClick={handleMenuClick}
             items={secondaryMenuItems}
             selectable={false}
             style={{
               border: 'none',
-              background: 'transparent',
+              background: 'transparent',  
             }}
           />
         </div>

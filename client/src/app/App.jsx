@@ -1,14 +1,29 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ClientLayout from '../components/layouts/ClientLayout';
+import { getFlatRoutes } from './routes';
+import { NotFoundPage } from '../pages';
 
 function App() {
+  const flatRoutes = getFlatRoutes();
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<ClientLayout></ClientLayout>} />
-        <Route path="/learning/track-hours" element={<ClientLayout></ClientLayout>} />
-        {/* Add more routes */}
+        {flatRoutes.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <ClientLayout>
+                {route.element}
+              </ClientLayout>
+            }
+          />
+        ))}
+        
+        {/* Route 404 - trang riêng biệt, không có layout */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
   );
